@@ -6,7 +6,7 @@
 
 // for convenience
 using json = nlohmann::json;
-
+using namespace std;
 // For converting back and forth between radians and degrees.
 constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
@@ -28,17 +28,34 @@ std::string hasData(std::string s) {
   return "";
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+
+  //return back if parameters passed are incomplete
+
+  if ( (int)argc != 4 )
+  {
+    cout << "Required 4 arguments to be passed , but only " << argc << " were passed !!!" <<endl;
+    return 0;
+  }
   uWS::Hub h;
 
   PID pid;
+  
   // TODO: Initialize the pid variable.
+  double v_Kp , v_Ki ,v_Kd ;
+  v_Kp = v_Ki = v_Kd =0.0;
+  
+  v_Kp = atof(argv[1]);
+  v_Ki = atof(argv[2]);
+  v_Kd = atof(argv[3]); 
+  pid.Init(v_Kp,v_Ki,v_Kd);
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
+    bool reset = false;
     if (length && length > 2 && data[0] == '4' && data[1] == '2')
     {
       auto s = hasData(std::string(data).substr(0, length));
@@ -57,10 +74,25 @@ int main()
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
-          
-          // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+          pid.UpdateError(cte);
+          steer_value= pid.TotalError();
+          if (steer_value > 1)
+           { steer_value = 1;
+             reset = true;
+           }
+          else if(steer_value < -1)
+            steer_value = -1;
 
+          // DEBUG
+          cout << "CTE: " << cte << " Steering Value: " << steer_value << " Speed Value : " << speed 
+          << " Angle Value : " << angle << std::endl;
+
+          if (reset)
+          {
+            cout << "*************************value ready for reset **********************" << endl;
+            // std::string msg = "42[\"reset\",{}]";
+            // ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+          }
           json msgJson;
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = 0.3;
