@@ -20,12 +20,15 @@ The I componenet which is also called the Integral component , is the integral s
 The D component which is also called the Derivative component is the change in CTE from one value to next. This component helps keep car on track and turns car back to middle in case of tight curves when value is not to large , large value would tend to slow the change  which could set car out of track during tight curves.
 
 #### Describe how the final hyperparameters were chosen.
+
+
 To tune the hyperparameters i implemented Twiddle ( code is removed from the final submitted code ) , this didn't helped be much as my hyperparameters values didn't change much after few iterations and my car used to be off-track in few seconds . So i decided to tune these parameters manually. So i randomly choose the parameter and tested on the track , but this was not taking me towards the final solution as my car used to run-off the track after crossing bridge.
 After struggling for hours i decided to go for values given in Udacity course content. This helped my car to run full track but still few places exists where car went to non-drivable portion. I fine tunned this parameter so as to meet the criteria.
 Below were the final value taken
 Kp : 0.33
 Ki : 0.00019
 Kd : 5.0
+
 ---
 
 ## Dependencies
