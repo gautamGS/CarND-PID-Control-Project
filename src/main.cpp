@@ -28,82 +28,89 @@ std::string hasData(std::string s) {
   return "";
 }
 
+void sendMsg(uWS::WebSocket<uWS::SERVER> ws,double steer_value , double throttle=0.3)
+{
+   json msgJson;
+   msgJson["steering_angle"] = steer_value;
+   msgJson["throttle"] = throttle;
+   auto msg = "42[\"steer\"," + msgJson.dump() + "]";
+   std::cout << msg << std::endl;
+   ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+}
+
+void resetMsg(uWS::WebSocket<uWS::SERVER> ws)
+{
+  std::string msg = "42[\"reset\",{}]";
+  ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+}
+
+void dispMsg(double cte ,double  steer_ , double speed , double angle )
+{
+  cout << "CTE: " << cte << " Steering Value: " << steer_  << " speed: " << speed << " Angle: " << angle << endl;
+
+}
 int main(int argc, char *argv[])
 {
-
-  //return back if parameters passed are incomplete
-
-  if ( (int)argc != 4 )
-  {
-    cout << "Required 4 arguments to be passed , but only " << argc << " were passed !!!" <<endl;
-    return 0;
-  }
   uWS::Hub h;
-
   PID pid;
-  
-  // TODO: Initialize the pid variable.
   double v_Kp , v_Ki ,v_Kd ;
   v_Kp = v_Ki = v_Kd =0.0;
   
-  v_Kp = atof(argv[1]);
-  v_Ki = atof(argv[2]);
-  v_Kd = atof(argv[3]); 
-  pid.Init(v_Kp,v_Ki,v_Kd);
+  //code to assign values to parameters based on command line values
+  //this is used for manual tuning
 
+  if ((int)argc == 4)
+  {
+    v_Kp = atof(argv[1]);
+    v_Ki = atof(argv[2]);
+    v_Kd = atof(argv[3]); 
+  }
+  else
+  {
+   // set values in case values are not passed through command line
+   //these values are deduced afer tuining parameters manually 
+   v_Kp = 0.33;
+   v_Ki = 0.00019;
+   v_Kd = 5.0; 
+  
+  }
+
+  //Initialize the pid variable.
+  pid.Init(v_Kp,v_Ki,v_Kd);
+    
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
-    bool reset = false;
+    // cout << "inside on message" <<endl;
     if (length && length > 2 && data[0] == '4' && data[1] == '2')
     {
       auto s = hasData(std::string(data).substr(0, length));
       if (s != "") {
         auto j = json::parse(s);
         std::string event = j[0].get<std::string>();
-        if (event == "telemetry") {
+        if (event == "telemetry") 
+        {
           // j[1] is the data JSON object
           double cte = std::stod(j[1]["cte"].get<std::string>());
           double speed = std::stod(j[1]["speed"].get<std::string>());
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
           double steer_value;
-          /*
-          * TODO: Calcuate steering value here, remember the steering value is
-          * [-1, 1].
-          * NOTE: Feel free to play around with the throttle and speed. Maybe use
-          * another PID controller to control the speed!
-          */
+          
+          //call UpdateError function
           pid.UpdateError(cte);
+          //get the steer value 
           steer_value= pid.TotalError();
-          if (steer_value > 1)
-           { steer_value = 1;
-             reset = true;
-           }
-          else if(steer_value < -1)
-            steer_value = -1;
-
-          // DEBUG
-          cout << "CTE: " << cte << " Steering Value: " << steer_value << " Speed Value : " << speed 
-          << " Angle Value : " << angle << std::endl;
-
-          if (reset)
-          {
-            cout << "*************************value ready for reset **********************" << endl;
-            // std::string msg = "42[\"reset\",{}]";
-            // ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-          }
-          json msgJson;
-          msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
-          auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
-          ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
-        }
-      } else {
+          dispMsg(cte,steer_value,speed,angle);
+          //send the masg to simulator with steer_value
+          sendMsg(ws,steer_value);
+          
+          } }
+    else
+     {
         // Manual driving
         std::string msg = "42[\"manual\",{}]";
-        ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+         ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
       }
     }
   });

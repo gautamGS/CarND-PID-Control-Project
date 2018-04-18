@@ -1,6 +1,31 @@
-# CarND-Controls-PID
-Self-Driving Car Engineer Nanodegree Program
+[video1]: ./output.mp4 "Output Video"
 
+# CarND-Controls-PID
+
+In this project i implemented PID i.e. Proportional-Integral-Derivative Controller to provide steering angle 
+for simulated car. This project also involves tunning coefficients of PID in order to calucluate steering angle for car.
+
+### Result
+
+The car successfully drove a lap around the track , in such a way that No tire left the drivalble portion of the simulated track.
+Video can be seen [here] (./output.mp4) or look for output.mp4 file in root folder.
+
+### Reflection
+
+#### Describe the effect each of the P, I, D components had in your implementation.
+The P component which is also called the Proportional component has a proportional effect on car steering makeing the car move left or right to reduce the error. Increase in value for this component causes the car to wobble/oscilate more on high speed.
+
+The I componenet which is also called the Integral component , is the integral sum of all the CTE's. If the value is high car tends to oscilate more , a very low value of I keeps the car oscillate less and tends to keep within the lane.
+
+The D component which is also called the Derivative component is the change in CTE from one value to next. This component helps keep car on track and turns car back to middle in case of tight curves when value is not to large , large value would tend to slow the change  which could set car out of track during tight curves.
+
+#### Describe how the final hyperparameters were chosen.
+To tune the hyperparameters i implemented Twiddle ( code is removed from the final submitted code ) , this didn't helped be much as my hyperparameters values didn't change much after few iterations and my car used to be off-track in few seconds . So i decided to tune these parameters manually. So i randomly choose the parameter and tested on the track , but this was not taking me towards the final solution as my car used to run-off the track after crossing bridge.
+After struggling for hours i decided to go for values given in Udacity course content. This helped my car to run full track but still few places exists where car went to non-drivable portion. I fine tunned this parameter so as to meet the criteria.
+Below were the final value taken
+Kp : 0.33
+Ki : 0.00019
+Kd : 5.0
 ---
 
 ## Dependencies
@@ -28,71 +53,10 @@ Self-Driving Car Engineer Nanodegree Program
 
 There's an experimental patch for windows in this [PR](https://github.com/udacity/CarND-PID-Control-Project/pull/3)
 
-## Basic Build Instructions
+## Basic Build / Run Instructions
 
 1. Clone this repo.
 2. Make a build directory: `mkdir build && cd build`
 3. Compile: `cmake .. && make`
 4. Run it: `./pid`. 
-
-Tips for setting up your environment can be found [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
-
-## Editor Settings
-
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
-
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
-
-## Code Style
-
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
-
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
-
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
-
-## Hints!
-
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
-
-## Call for IDE Profiles Pull Requests
-
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
 
